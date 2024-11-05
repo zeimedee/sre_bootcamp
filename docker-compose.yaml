@@ -1,0 +1,37 @@
+version: "3.8"
+services: 
+    web:
+        container_name: sre_bootcamp
+        build: .
+        ports: 
+            - "4000:4000"
+        volumes: 
+            - api:/app
+        depends_on: 
+            - postgres
+        links: 
+            - postgres
+        networks: 
+            - fullstack
+
+    postgres:
+        container_name: postgres
+        image: postgres:latest
+        environment:
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            POSTGRES_DB: ${POSTGRES_DB}
+        ports:
+            - "5432:5432"
+        volumes: 
+            - dbdata:/usr/lib/postgresql/data
+        networks: 
+            - fullstack
+    
+volumes: 
+    api:
+    dbdata:
+
+networks: 
+    fullstack:
+        driver: bridge 
