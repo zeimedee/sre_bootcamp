@@ -6,7 +6,7 @@ services:
         ports: 
             - "4000:4000"
         volumes: 
-            - api:/app
+            - .:/app
         depends_on: 
             - postgres
         links: 
@@ -29,7 +29,6 @@ services:
             - fullstack
     
 volumes: 
-    api:
     dbdata:
 
 networks: 

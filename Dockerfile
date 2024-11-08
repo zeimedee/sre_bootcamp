@@ -2,13 +2,15 @@ FROM golang:1.23-alpine
 
 WORKDIR /app
 
-COPY . .
+COPY go.mod go.sum ./
 
 RUN go mod download
 
 RUN go mod tidy
 
-RUN go build -o /sre_bootcamp
+COPY . .
+
+RUN go build -o /sre_bootcamp ./cmd/api/main.go
 
 EXPOSE 4000
 
