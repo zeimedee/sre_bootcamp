@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/zeimedee/sre_bootcamp/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -36,11 +35,6 @@ type DBInstance struct {
 var DB DBInstance
 
 func ConnectDb() {
-
-	er := godotenv.Load()
-	if er != nil {
-		log.Fatalf("Error loading .env file: %v", er)
-	}
 
 	Db := NewDb()
 	dsn := fmt.Sprintf("host='%s' user='%s' password='%s' dbname='%s' port=5432 sslmode=disable TimeZone=Asia/Shanghai", Db.HOST, Db.USER, Db.PASSWORD, Db.NAME)

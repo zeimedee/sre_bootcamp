@@ -15,17 +15,30 @@ func CreateNewStudent(student models.Student) (models.Student, error) {
 
 func GetStudent(id string) (models.Student, error) {
 	students := models.Student{}
-	database.DB.Db.Find(students, "id = ?", id)
+	result := database.DB.Db.Where("id = ?", id).Find(&students)
+	if result.Error != nil {
+		log.Println("error retrieving student:", result.Error)
+		return students, result.Error
+	}
 	return students, nil
 }
 
 func GetAllStudent() ([]models.Student, error) {
 	students := []models.Student{}
+	result := database.DB.Db.Find(&students)
+	if result.Error != nil {
+		log.Println("error retrieving students:", result.Error)
+		return students, result.Error
+	}
 	return students, nil
 }
 
-func UpdateStudent(student *models.Student) error {
-	database.DB.Db.Save(&student)
+func UpdateStudent(student *models.Student, id string) error {
+	result := database.DB.Db.Save(&student)
+	if result.Error != nil {
+		log.Println("error updating:", result.Error)
+		return result.Error
+	}
 	return nil
 }
 

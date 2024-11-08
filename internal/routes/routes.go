@@ -8,7 +8,7 @@ import (
 func SetUpRouter() *gin.Engine {
 	router := gin.Default()
 
-	api := router.Group("/students")
+	api := router.Group("/api/v1/students")
 	{
 		api.GET("/healthcheck", handlers.Healthcheck)
 		api.POST("/create", handlers.CreateNewStudent)
