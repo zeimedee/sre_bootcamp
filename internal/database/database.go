@@ -16,6 +16,7 @@ type database struct {
 	USER     string
 	PASSWORD string
 	NAME     string
+	PORT     string
 }
 
 func NewDb() *database {
@@ -24,6 +25,7 @@ func NewDb() *database {
 		USER:     os.Getenv("POSTGRES_USER"),
 		PASSWORD: os.Getenv("POSTGRES_PASSWORD"),
 		NAME:     os.Getenv("POSTGRES_DB"),
+		PORT:     os.Getenv("POSTGRES_PORT"),
 	}
 	return db
 }
@@ -37,7 +39,7 @@ var DB DBInstance
 func ConnectDb() {
 
 	Db := NewDb()
-	dsn := fmt.Sprintf("host='%s' user='%s' password='%s' dbname='%s' port=5432 sslmode=disable TimeZone=Asia/Shanghai", Db.HOST, Db.USER, Db.PASSWORD, Db.NAME)
+	dsn := fmt.Sprintf("host='%s' user='%s' password='%s' dbname='%s' port='%s' sslmode=disable TimeZone=Asia/Shanghai", Db.HOST, Db.USER, Db.PASSWORD, Db.NAME, Db.PORT)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Info),
 	})
