@@ -15,3 +15,6 @@ RUN go build -o /sre_bootcamp ./cmd/api/main.go
 EXPOSE 4000
 
 CMD [ "/sre_bootcamp" ]
+
+
+

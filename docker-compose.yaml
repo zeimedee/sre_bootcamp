@@ -1,6 +1,41 @@
 services:
+      api1:
+        build:
+          context: .
+        ports:
+          - "4000:4000"
+        depends_on:
+          db:
+            condition: service_healthy
+        links:
+          - db
+        networks:
+          - fullstack
+        environment:
+          POSTGRES_USER: ${POSTGRES_USER}
+          POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+          POSTGRES_DB: ${POSTGRES_DB}
+          POSTGRES_PORT: ${POSTGRES_PORT}
+      api2:
+        build:
+          context: .
+        ports:
+          - "4001:4000"
+        depends_on:
+          db:
+            condition: service_healthy
+        links:
+          - db
+        networks:
+          - fullstack
+        environment:
+          POSTGRES_USER: ${POSTGRES_USER}
+          POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+          POSTGRES_DB: ${POSTGRES_DB}
+          POSTGRES_PORT: ${POSTGRES_PORT}
       db:
         image: postgres:latest
+        restart: always
         environment:
           POSTGRES_USER: ${POSTGRES_USER}
           POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -9,48 +44,23 @@ services:
             - "5432:5432"
         networks:
           - fullstack
-          
-      api1:
-        build:
-          context: .
-        ports:
-          - "4000:4000"
-        depends_on:
-          - db
-        links:
-          - db
-        networks:
-          - fullstack
-        environment:
-          POSTGRES_USER: ${POSTGRES_USER}
-          POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-          POSTGRES_DB: ${POSTGRES_DB}
-          POSTGRES_PORT: ${POSTGRES_PORT}
-
-      api2:
-        build:
-          context: .
-        ports:
-          - "4001:4000"
-        depends_on:
-          - db
-        links:
-          - db
-        networks:
-          - fullstack
-        environment:
-          POSTGRES_USER: ${POSTGRES_USER}
-          POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-          POSTGRES_DB: ${POSTGRES_DB}
-          POSTGRES_PORT: ${POSTGRES_PORT}
-     
+        healthcheck:
+          test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+          interval: 10s
+          timeout: 5s
+          retries: 5
+        volumes:
+          - db-data:/var/lib/postgresql/data
+      
       nginx:
         image: nginx:latest
         ports:
           - "80:80"
         depends_on:
-          - api1
-          - api2
+          api1:
+            condition: service_started
+          api2:
+            condition: service_started
         networks:
           - fullstack
         volumes:
@@ -59,3 +69,6 @@ services:
 networks: 
     fullstack:
         driver: bridge
+
+volumes:
+  db-data:
