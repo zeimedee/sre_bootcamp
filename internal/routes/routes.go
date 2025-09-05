@@ -3,10 +3,15 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/zeimedee/sre_bootcamp/internal/handlers"
+	"github.com/zeimedee/sre_bootcamp/internal/middleware"
 )
 
 func SetUpRouter() *gin.Engine {
 	router := gin.Default()
+
+	router.Use(middleware.TrackMetrics())
+
+	router.GET("/metrics", middleware.PrometheusHandler())
 
 	api := router.Group("/api/v1/students")
 	{

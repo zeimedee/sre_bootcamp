@@ -1,12 +1,46 @@
 services:
+      prometheus:
+        image: prom/prometheus:latest
+        container_name: prometheus
+        volumes:
+          - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+        ports:
+          - "9090:9090"
+        networks:
+          - fullstack
+        labels:
+          - "traefik.enable=true"
+          - "traefik.http.routers.prometheus.rule=Host(`prometheus.localhost`)"
+          - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+      grafana:
+        image: grafana/grafana-oss:latest
+        container_name: grafana
+        ports:
+          - "3000:3000"
+        environment:
+          - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN}
+          - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+        volumes:
+          - ./grafana/grafana.yml:/etc/grafana/provisioning/datasource/datasource.yml
+          - grafana-data:/var/lib/grafana
+        networks:
+          - fullstack
+        depends_on:
+          - prometheus
+        labels:
+          - "traefik.enable=true"
+          - "traefik.http.routers.grafana.rule=Host(`grafana.localhost`)"
+          - "traefik.http.services.grafana.loadbalancer.server.port=3000"
       api1:
         build:
           context: .
-        ports:
-          - "4000:4000"
         depends_on:
           db:
             condition: service_healthy
+        labels:
+          - "traefik.enable=true"
+          - "traefik.http.routers.api.rule=Host(`localhost`)"
+          - "traefik.http.services.api.loadbalancer.server.port=4000"
         links:
           - db
         networks:
@@ -19,11 +53,13 @@ services:
       api2:
         build:
           context: .
-        ports:
-          - "4001:4000"
         depends_on:
           db:
             condition: service_healthy
+        labels:
+          - "traefik.enable=true"
+          - "traefik.http.routers.api.rule=Host(`localhost`)"
+          - "traefik.http.services.api.loadbalancer.server.port=4000"
         links:
           - db
         networks:
@@ -51,20 +87,35 @@ services:
           retries: 5
         volumes:
           - db-data:/var/lib/postgresql/data
-      
-      nginx:
-        image: nginx:latest
+      traefik:
+        image: traefik:v3.5
+        command:
+          - "--api.insecure=true"
+          - "--providers.docker=true"
+          - "--entrypoints.web.address=:80"
+          - "--metrics.prometheus=true"
+          - "--metrics.prometheus.addEntryPointsLabels=true"
+          - "--metrics.prometheus.addServicesLabels=true"
         ports:
           - "80:80"
-        depends_on:
-          api1:
-            condition: service_started
-          api2:
-            condition: service_started
+          - "8080:8080"
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock
         networks:
           - fullstack
-        volumes:
-          - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      # nginx:
+      #   image: nginx:latest
+      #   ports:
+      #     - "80:80"
+      #   depends_on:
+      #     api1:
+      #       condition: service_started
+      #     api2:
+      #       condition: service_started
+      #   networks:
+      #     - fullstack
+      #   volumes:
+      #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
 
 networks: 
     fullstack:
@@ -72,3 +123,4 @@ networks:
 
 volumes:
   db-data:
+  grafana-data:

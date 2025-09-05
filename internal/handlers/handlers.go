@@ -10,7 +10,7 @@ import (
 )
 
 func Healthcheck(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{"status": "healthy"})
+	ctx.JSON(http.StatusOK, gin.H{"status": "healthy new line"})
 }
 
 func CreateNewStudent(ctx *gin.Context) {
